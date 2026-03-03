@@ -83,9 +83,31 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
     }
 
     @Override
+    @Transactional
     public boolean updateMaterial(Material material) {
         material.setUpdateTime(LocalDateTime.now());
-        return updateById(material);
+        boolean updated = updateById(material);
+        if (!updated || material.getId() == null) {
+            return updated;
+        }
+
+        // 保持库存镜像字段与物料主数据同步，避免颜色等属性显示不同步
+        Inventory inventory = inventoryService.getInventoryByMaterialId(material.getId());
+        if (inventory != null) {
+            inventory.setMaterialCode(material.getCode());
+            inventory.setMaterialName(material.getName());
+            inventory.setSpec(material.getSpec());
+            inventory.setUnit(material.getUnit());
+            if (material.getPrice() != null) {
+                inventory.setPrice(material.getPrice());
+                int quantity = inventory.getQuantity() == null ? 0 : inventory.getQuantity();
+                inventory.setAmount(material.getPrice().multiply(BigDecimal.valueOf(quantity)));
+            }
+            inventory.setUpdateTime(LocalDateTime.now());
+            inventoryService.updateById(inventory);
+        }
+
+        return true;
     }
 
     @Override

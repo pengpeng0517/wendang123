@@ -1,0 +1,83 @@
+{
+  "total": 11,
+  "failed": 4,
+  "results": [
+    {
+      "name": "health_root",
+      "ok": true,
+      "detail": "status=200",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "name": "login_admin_or_warehouse",
+      "ok": true,
+      "detail": "credential=('admin', 'password')",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "unauth_system_config_list_should_fail",
+      "ok": true,
+      "detail": "status=404, body={\"timestamp\":\"2026-03-03T05:28:18.646+00:00\",\"status\":404,\"error\":\"Not Found\",\"path\":\"/api/system/config/list\"}",
+      "expected": "401/403 or business reject",
+      "actual": "http=404,code=None"
+    },
+    {
+      "name": "unauth_user_add_should_fail",
+      "ok": false,
+      "detail": "status=200, body={\"code\":200,\"message\":\"新增成功\",\"data\":{\"id\":3,\"username\":\"audit_user_1772515698\",\"password\":\"$2a$10$rF12spaWABGrnKMxoEHm8OIjfBgG2OYjMd.sf2FdHoBx47Nv5vxLu\",\"name\":\"audit_user_1772515698\",\"role\":\"warehouse\",\"status\":1,\"creat",
+      "expected": "blocked",
+      "actual": "http=200,code=200"
+    },
+    {
+      "name": "material_add",
+      "ok": true,
+      "detail": "status=200, body={\"code\":200,\"message\":\"新增成功\",\"data\":{\"id\":4,\"code\":\"MAT000001\",\"name\":\"AUTO_TEST_MAT_1772515698\",\"categoryId\":1,\"spec\":\"测试色\",\"unit\":\"kg\",\"supplierId\":1,\"price\":12.5,\"minStock\":1,\"maxStock\":1000,\"status\":1,\"remark\":\"api t",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "material_find_by_name",
+      "ok": true,
+      "detail": "material_id=4",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "inventory_duplicate_materialId_should_not_happen",
+      "ok": false,
+      "detail": "add1=200, add2=200, rows=3",
+      "expected": "<=1 row per material_id",
+      "actual": "3 rows"
+    },
+    {
+      "name": "storage_add_auto_location",
+      "ok": false,
+      "detail": "status=200, body={\"code\":400,\"message\":\"服务器内部错误：Expected one result (or null) to be returned by selectOne(), but found: 3\",\"data\":null}",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "outbound_order_add",
+      "ok": true,
+      "detail": "status=200, order_id=1",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "approve_insufficient_stock_should_fail",
+      "ok": true,
+      "detail": "approve_http=200, status_field=None, qty_after=0, body={\"code\":400,\"message\":\"批准失败：Expected one result (or null) to be returned by selectOne(), but found: 3\",\"data\":null}",
+      "expected": "reject approve",
+      "actual": "approved_status=None"
+    },
+    {
+      "name": "unauth_log_record_should_fail",
+      "ok": false,
+      "detail": "status=200, body={\"code\":200,\"message\":\"操作成功\",\"data\":null}",
+      "expected": "blocked",
+      "actual": "http=200, code=200"
+    }
+  ]
+}

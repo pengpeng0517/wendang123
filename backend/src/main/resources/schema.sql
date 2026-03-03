@@ -100,6 +100,7 @@ CREATE TABLE IF NOT EXISTS storage (
     material_name VARCHAR(100) COMMENT 'Material Name',
     quantity INT NOT NULL COMMENT 'Storage Quantity',
     batch_number VARCHAR(50) COMMENT 'Batch Number',
+    location VARCHAR(100) COMMENT 'Location Code',
     storage_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Storage Time',
     operator VARCHAR(50) COMMENT 'Operator',
     status INT DEFAULT 1 COMMENT 'Status: 0-disabled, 1-enabled',
@@ -164,6 +165,37 @@ CREATE TABLE IF NOT EXISTS inventory (
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update Time',
     FOREIGN KEY (material_id) REFERENCES material(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Inventory Table';
+
+-- Create warehouse location table
+CREATE TABLE IF NOT EXISTS warehouse_location (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'Location ID',
+    code VARCHAR(50) NOT NULL UNIQUE COMMENT 'Location Code',
+    zone VARCHAR(50) COMMENT 'Zone',
+    capacity INT DEFAULT 0 COMMENT 'Capacity',
+    current_load INT DEFAULT 0 COMMENT 'Current Load',
+    status INT DEFAULT 1 COMMENT 'Status: 0-disabled, 1-enabled',
+    priority INT DEFAULT 0 COMMENT 'Priority, bigger means higher priority',
+    temperature_level VARCHAR(50) COMMENT 'Temperature Level',
+    remark VARCHAR(200) COMMENT 'Remark',
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Create Time',
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update Time'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Warehouse Location Table';
+
+-- Create location allocation log table
+CREATE TABLE IF NOT EXISTS location_allocation_log (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'Allocation Log ID',
+    material_id BIGINT COMMENT 'Material ID',
+    material_code VARCHAR(50) COMMENT 'Material Code',
+    material_name VARCHAR(100) COMMENT 'Material Name',
+    inbound_quantity INT COMMENT 'Inbound Quantity',
+    location_code VARCHAR(50) COMMENT 'Allocated Location Code',
+    score DECIMAL(10,2) COMMENT 'Allocation Score',
+    reason VARCHAR(500) COMMENT 'Allocation Reason',
+    season_tag VARCHAR(50) COMMENT 'Season Tag',
+    operator VARCHAR(50) COMMENT 'Operator',
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Create Time',
+    FOREIGN KEY (material_id) REFERENCES material(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Location Allocation Log Table';
 
 -- Create inventory record table
 CREATE TABLE IF NOT EXISTS inventory_record (
@@ -230,3 +262,39 @@ CREATE TABLE IF NOT EXISTS sys_log (
     operate_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Operate Time',
     execute_time BIGINT DEFAULT 0 COMMENT 'Execute Time (ms)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='System Log Table';
+
+-- RL policy schema extensions
+ALTER TABLE location_allocation_log
+    ADD COLUMN IF NOT EXISTS policy_type VARCHAR(20) COMMENT 'Policy Type: rule/rl',
+    ADD COLUMN IF NOT EXISTS policy_version VARCHAR(50) COMMENT 'Policy Version',
+    ADD COLUMN IF NOT EXISTS confidence DECIMAL(10,4) COMMENT 'Policy Confidence',
+    ADD COLUMN IF NOT EXISTS fallback_reason VARCHAR(100) COMMENT 'Fallback Reason',
+    ADD COLUMN IF NOT EXISTS latency_ms BIGINT COMMENT 'Decision Latency (ms)',
+    ADD COLUMN IF NOT EXISTS trace_id VARCHAR(64) COMMENT 'Trace ID';
+
+CREATE TABLE IF NOT EXISTS location_policy_event (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'Policy Event ID',
+    event_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Event Time',
+    material_id BIGINT COMMENT 'Material ID',
+    material_code VARCHAR(50) COMMENT 'Material Code',
+    category_id BIGINT COMMENT 'Category ID',
+    inbound_qty INT COMMENT 'Inbound Quantity',
+    candidate_set_json TEXT COMMENT 'Candidate Set JSON',
+    selected_action_code VARCHAR(50) COMMENT 'Selected Action Code',
+    executed_action_code VARCHAR(50) COMMENT 'Executed Action Code',
+    policy_mode VARCHAR(20) COMMENT 'Policy Mode: rule/shadow/manual/auto',
+    policy_type VARCHAR(20) COMMENT 'Policy Type: rule/rl',
+    policy_version VARCHAR(50) COMMENT 'Policy Version',
+    state_vector_json TEXT COMMENT 'State Vector JSON',
+    reward_total DECIMAL(12,4) COMMENT 'Reward Total',
+    reward_breakdown_json TEXT COMMENT 'Reward Breakdown JSON',
+    is_fallback TINYINT DEFAULT 0 COMMENT 'Whether Fallback',
+    confidence DECIMAL(10,4) COMMENT 'Policy Confidence',
+    operator VARCHAR(50) COMMENT 'Operator',
+    trace_id VARCHAR(64) COMMENT 'Trace ID',
+    FOREIGN KEY (material_id) REFERENCES material(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Location Policy Event Table';
+
+ALTER TABLE location_policy_event ADD INDEX idx_location_policy_event_time (event_time);
+ALTER TABLE location_policy_event ADD INDEX idx_location_policy_event_trace (trace_id);
+ALTER TABLE location_policy_event ADD INDEX idx_location_policy_event_policy (policy_mode, policy_type);

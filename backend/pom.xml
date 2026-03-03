@@ -18,6 +18,7 @@
         <lombok.version>1.18.28</lombok.version>
         <mysql.version>8.0.33</mysql.version>
         <redis.version>3.2.0.RELEASE</redis.version>
+        <onnxruntime.version>1.16.3</onnxruntime.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
@@ -51,7 +52,7 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>${mysql.version}</version>
         </dependency>
-        
+
         <!-- H2内存数据库 -->
         <dependency>
             <groupId>com.h2database</groupId>
@@ -64,6 +65,13 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
             <version>${jjwt.version}</version>
+        </dependency>
+
+        <!-- ONNX Runtime -->
+        <dependency>
+            <groupId>com.microsoft.onnxruntime</groupId>
+            <artifactId>onnxruntime</artifactId>
+            <version>${onnxruntime.version}</version>
         </dependency>
 
         <!-- Lombok -->

@@ -1,0 +1,36 @@
+{
+  "name": "location_rl_feature_schema_v1",
+  "version": "v1",
+  "algo": "dqn-candidate-scoring",
+  "input": {
+    "dtype": "float32",
+    "shape": [1, 16],
+    "features": [
+      "inbound_qty_norm",
+      "capacity_norm",
+      "current_load_norm",
+      "available_ratio",
+      "load_ratio",
+      "post_load_ratio",
+      "zone_level",
+      "priority_norm",
+      "temperature_match",
+      "preferred_match",
+      "is_peak_season",
+      "is_low_season",
+      "material_hash_norm",
+      "location_count_norm",
+      "candidate_rank_proxy_norm",
+      "capacity_enough_flag"
+    ]
+  },
+  "output": {
+    "name": "score",
+    "dtype": "float32",
+    "shape": [1, 1]
+  },
+  "constraints": {
+    "required_policy_modes": ["shadow", "manual", "auto"],
+    "fallback_modes": ["rule"]
+  }
+}

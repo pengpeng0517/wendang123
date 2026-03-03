@@ -1,0 +1,104 @@
+{
+  "total": 14,
+  "failed": 7,
+  "results": [
+    {
+      "name": "health_root",
+      "ok": true,
+      "detail": "status=200",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "name": "login",
+      "ok": true,
+      "detail": "credential=(admin,password)",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "unauth_system_config_list_should_block",
+      "ok": false,
+      "detail": "status=200,body={\"code\":200,\"message\":\"操作成功\",\"data\":[{\"id\":1,\"configKey\":\"location.policy.mode\",\"configValue\":\"rule\",\"configName\":\"库位策略模式\",\"description\":\"rule|shadow|manual|auto\",\"status\":1,\"creat",
+      "expected": "blocked",
+      "actual": "http=200,code=200"
+    },
+    {
+      "name": "unauth_user_add_should_block",
+      "ok": false,
+      "detail": "status=200,body={\"code\":200,\"message\":\"新增成功\",\"data\":{\"id\":4,\"username\":\"audit_u_1772515781\",\"password\":\"$2a$10$.Vn1AiV7Ee2ICv25NireHOAFQFmooPTtzbi5d9tBdjaQm3/1fMzoS\",\"name\":\"audit_u_1772515781\",\"role\":\"warehouse\",\"status\":1,\"createTime\"",
+      "expected": "blocked",
+      "actual": "http=200,code=200"
+    },
+    {
+      "name": "unauth_policy_mode_update_should_block",
+      "ok": false,
+      "detail": "before=rule, after=manual, status=200, body={\"code\":200,\"message\":\"操作成功\",\"data\":\"策略模式更新成功\"}",
+      "expected": "mode unchanged",
+      "actual": "mode_after=manual"
+    },
+    {
+      "name": "material_add_for_duplicate_case",
+      "ok": true,
+      "detail": "status=200, body={\"code\":200,\"message\":\"新增成功\",\"data\":{\"id\":5,\"code\":\"MAT000002\",\"name\":\"AUTO_DUP_1772515781\",\"categoryId\":1,\"spec\":\"dup色\",\"unit\":\"kg\",\"supplierId\":1,\"price\":9.9,\"minStock\":1,\"maxStock\":99,\"status\":1,\"r",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "material_find_duplicate_case",
+      "ok": true,
+      "detail": "material_id=5",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "inventory_duplicate_row_should_not_exist",
+      "ok": false,
+      "detail": "add1=200,add2=200,rows=3",
+      "expected": "<=1",
+      "actual": 3
+    },
+    {
+      "name": "storage_add_should_not_crash_when_inventory_has_duplicates",
+      "ok": false,
+      "detail": "status=200,body={\"code\":400,\"message\":\"服务器内部错误：Expected one result (or null) to be returned by selectOne(), but found: 3\",\"data\":null}",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "material_add_for_approve_case",
+      "ok": true,
+      "detail": "status=200, body={\"code\":200,\"message\":\"新增成功\",\"data\":{\"id\":6,\"code\":\"MAT000003\",\"name\":\"AUTO_APPROVE_1772515781\",\"categoryId\":1,\"spec\":\"approve色\",\"unit\":\"kg\",\"supplierId\":1,\"price\":15,\"minStock\":1,",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "storage_add_for_approve_case",
+      "ok": true,
+      "detail": "status=200,body={\"code\":200,\"message\":\"新增成功\",\"data\":{\"id\":1,\"materialId\":6,\"materialCode\":\"MAT000003\",\"materialName\":\"AUTO_APPROVE_1772515781\",\"quantity\":2,\"batchNumber\":\"BS1772515781\",\"location\":",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "outbound_add_for_approve_case",
+      "ok": true,
+      "detail": "status=200,order_id=2",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "approve_with_insufficient_stock_should_not_mark_approved",
+      "ok": false,
+      "detail": "approve_http=200,status_after=1,order_info_status=1,qty_before=2,qty_after=2,body={\"code\":200,\"message\":\"操作成功\",\"data\":{\"id\":2,\"orderNo\":\"OUT20260303132941\",\"type\":\"sale\",\"recipientId\":null,\"recipientName\":\"approve-test\",\"totalQuantity\":999,\"status\":1,\"remark\":\"i",
+      "expected": "not approved",
+      "actual": "approved=1"
+    },
+    {
+      "name": "unauth_log_record_should_block",
+      "ok": false,
+      "detail": "status=200, body={\"code\":200,\"message\":\"操作成功\",\"data\":null}",
+      "expected": "blocked",
+      "actual": "http=200,code=200"
+    }
+  ]
+}

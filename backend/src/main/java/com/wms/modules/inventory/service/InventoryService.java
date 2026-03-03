@@ -13,7 +13,11 @@ public interface InventoryService extends IService<Inventory> {
 
     boolean addStock(Long materialId, Integer quantity, String operator);
 
+    boolean addStock(Long materialId, Integer quantity, String operator, String locationCode);
+
     boolean reduceStock(Long materialId, Integer quantity, String operator);
+
+    boolean reduceStock(Long materialId, Integer quantity, String operator, String locationCode);
 
     boolean checkStock(Long materialId, Integer quantity);
 }
